@@ -23,7 +23,7 @@ router.get("/findById/:id", getUserById);
 //subscribe a user
 router.put("/sub/:id", verifyToken, subscribe);
 //unsubscribe a user
-router.put("/sub/:id", verifyToken, unsubscribe);
+router.put("/unsub/:id", verifyToken, unsubscribe);
 
 //dislike a video
 router.put("/dislikes/:id", verifyToken, dislike);

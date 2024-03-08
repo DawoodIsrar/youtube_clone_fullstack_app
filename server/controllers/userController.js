@@ -76,8 +76,58 @@ export const getUserById = async (req, res, next) => {
     next(createError(500, "internal server error"));
   }
 };
-export const subscribe = async (req, res, next) => {};
-export const unsubscribe = async (req, res, next) => {};
+export const subscribe = async (req, res, next) => {
+  try {
+    console.log(
+      "req reach here id of user who subscribe :",
+      req.user.id,
+      "and subscribe the channel",
+      req.params.id
+    );
+    await User.findByIdAndUpdate(req.user.id, {
+      $push: { subcriberedUsers: req.params.id },
+    });
+
+    await User.findByIdAndUpdate(req.params.id, {
+      $inc: { subcribers: 1 },
+    });
+    console.log(
+      "req reach here id of user who subscribe :",
+      req.user.id,
+      "and subscribe the channel",
+      req.params.id
+    );
+    return res.status(201).json({ message: "subscribed" });
+  } catch (error) {
+    next(createError(500, "something went wrong"));
+  }
+};
+export const unsubscribe = async (req, res, next) => {
+  try {
+    console.log(
+      "req reach here id of user who subscribe :",
+      req.user.id,
+      "and subscribe the channel",
+      req.params.id
+    );
+    await User.findByIdAndUpdate(req.user.id, {
+      $pull: { subcriberedUsers: req.params.id },
+    });
+
+    await User.findByIdAndUpdate(req.params.id, {
+      $inc: { subcribers: -1 },
+    });
+    console.log(
+      "req reach here id of user who subscribe :",
+      req.user.id,
+      "and subscribe the channel",
+      req.params.id
+    );
+    return res.status(201).json({ message: "unsubscribe" });
+  } catch (error) {
+    next(createError(500, "something went wrong"));
+  }
+};
 export const like = async (req, res, next) => {};
 export const dislike = async (req, res, next) => {};
 
