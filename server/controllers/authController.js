@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { createError } from "../createError.js";
+import { createError } from "../Error/createError.js";
 export const signup = async (req, res, next) => {
   try {
     try {
@@ -20,6 +20,11 @@ export const signup = async (req, res, next) => {
         const hash = bcrypt.hashSync(req.body.password, salt);
         const newUser = new User({ ...req.body, password: hash });
         await newUser.save();
+        return res.status(201).json({
+          status: 201,
+          message: "user ragister successfully!",
+          user: newUser,
+        });
       }
     } catch (error) {
       next(createError(404, "User cannot be register"));
@@ -39,7 +44,9 @@ export const signin = async (req, res, next) => {
     }
     const passwordIsTrue = bcrypt.compareSync(password, isuserExist.password);
     if (passwordIsTrue) {
-      const token = jwt.sign({ id: isuserExist._id }, "youtube");
+      const token = jwt.sign({ id: isuserExist._id }, "youtube", {
+        expiresIn: "1d",
+      });
       const { password, ...other } = isuserExist._doc;
       return res
         .cookie("acces_token", token, {
