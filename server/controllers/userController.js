@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import User from "../models/User.js";
 import { createError } from "../Error/createError.js";
+import Video from "../models/Video.js";
 
 export const updateUser = async (req, res, next) => {
   console.log("req params", req.params.id);
@@ -128,8 +129,68 @@ export const unsubscribe = async (req, res, next) => {
     next(createError(500, "something went wrong"));
   }
 };
-export const like = async (req, res, next) => {};
-export const dislike = async (req, res, next) => {};
+export const like = async (req, res, next) => {
+  try {
+    const id = req.user.id;
+    const videoId = req.params.id;
+    console.log("user id", id);
+    console.log("video id", videoId);
+
+    try {
+      // Use the { new: true } option to return the updated document
+      const commentedVideo = await Video.findByIdAndUpdate(
+        videoId,
+        {
+          $addToSet: { likes: id },
+          $pull: { dislikes: id },
+        },
+        { new: true }
+      );
+      console.log(commentedVideo);
+      if (!commentedVideo) {
+        throw createError(403, "Video not found");
+      }
+      if (req.user.id === commentedVideo.userId) {
+        return res.status(200).json(commentedVideo);
+      } else {
+        next(createError(403, "sorry video not found"));
+      }
+    } catch (error) {
+      next(createError(403, "Video not found"));
+    }
+  } catch (error) {
+    next(createError(500, "Internal server error"));
+  }
+};
+
+export const dislike = async (req, res, next) => {
+  try {
+    const id = req.user.id;
+    const videoId = req.params.id;
+
+    try {
+      // Use the { new: true } option to return the updated document
+      const updatedVideo = await Video.findByIdAndUpdate(
+        videoId,
+        {
+          $addToSet: { dislikes: id },
+          $pull: { likes: id },
+        },
+        { new: true }
+      );
+
+      if (!updatedVideo) {
+        throw createError(403, "Video not found");
+      }
+
+      return res.status(200).json("The video is disliked");
+    } catch (error) {
+      next(createError(403, "Video not found"));
+    }
+  } catch (error) {
+    next(createError(500, "Internal server error"));
+  }
+};
 
 export default {
   updateUser,
