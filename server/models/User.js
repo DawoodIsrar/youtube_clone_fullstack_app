@@ -20,11 +20,9 @@ const UserSchema = new mongoose.Schema(
     },
     subcribers: {
       type: Number,
-      required: true,
     },
     subcriberedUsers: {
       type: [String],
-      required: true,
     },
   },
   {
